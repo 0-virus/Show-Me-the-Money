@@ -92,7 +92,7 @@ def main():
     text(resources/'Play.command', '#!/bin/sh\nset -eu\nHERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)\nexport LANG="${LANG:-en_US.UTF-8}"\nexport COLORTERM=truecolor\nexec "$HERE/moneycopy"\n')
     plist = dict(CFBundleExecutable='MoneyCopy', CFBundleIdentifier='local.moneycopy.game',
                  CFBundleName='Money Copy', CFBundleDisplayName='가만히 있어도 돈이 복사가 되면 얼마나 좋을까',
-                 CFBundlePackageType='APPL', CFBundleShortVersionString='1.0.0', CFBundleVersion='1',
+                 CFBundlePackageType='APPL', CFBundleShortVersionString='1.1.0', CFBundleVersion='2',
                  LSMinimumSystemVersion='13.0', NSHighResolutionCapable=True)
     (bundle/'Info.plist').write_bytes(plistlib.dumps(plist))
     notices = third_party_notices()

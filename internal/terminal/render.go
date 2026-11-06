@@ -2,6 +2,7 @@ package terminal
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -100,12 +101,15 @@ func (a *App) Draw() {
 	case result:
 		a.drawResult()
 	}
+	if a.confirmExit {
+		a.drawConfirmation()
+	}
 	a.screen.Show()
 }
 func (a *App) drawIntro() {
 	f := a.frame()
 	y := a.formY()
-	a.text(f.x+f.w-16, 2, "● OFFLINE / 01", style(muted))
+	a.text(f.x+f.w-10, 2, "● OFFLINE / 01", style(muted))
 	a.center(6, "가만히 있어도 돈이 복사가 되면 얼마나 좋을까", style(green).Bold(true))
 	a.button(a.monthRect(), "월급", !a.annual)
 	a.button(a.yearRect(), "연봉", a.annual)
@@ -123,20 +127,13 @@ func (a *App) drawIntro() {
 	n, err := strconv.ParseInt(strings.ReplaceAll(a.amount, ",", ""), 10, 64)
 	if err == nil {
 		if s, e := game.New(n, a.annual, a.now()); e == nil {
-			a.center(y+8, "시급 "+decimal(s.HourlyExact())+"원  /  5초마다 "+decimal(s.HourlyExact()/720)+"원", style(green))
+			a.center(y+8, "시급 "+decimal(s.HourlyExact())+"원  /  1분마다 "+decimal(s.HourlyExact()/60)+"원", style(green))
 		}
 	}
 	if a.message != "" {
 		a.center(y+8, a.message, style(red))
 	}
 	a.button(a.startRect(), "돈 복사 시작 Enter", true)
-	_, height := a.screen.Size()
-	if height >= 28 {
-		a.center(y+14, "현실과 같은 속도로. 당신의 5초도 돈이 됩니다.", style(white))
-		a.center(y+16, "금색 지폐를 잡으면 30분치 급여가 성과급으로!", style(gold))
-	} else {
-		a.center(height-2, "금색 지폐 클릭: 30분치 급여  ·  5초마다 자동 입금", style(gold))
-	}
 	a.center(f.y+f.h-2, "Tab 월급/연봉   Enter 시작   Ctrl+U 입력 지우기   Esc 닫기", style(muted))
 }
 func (a *App) drawGame() {
@@ -152,33 +149,33 @@ func (a *App) drawGame() {
 		label string
 		value int64
 		color tcell.Color
-	}{{"기본급", s.Base(), white}, {"성과급", s.Bonus(), gold}, {"합계", s.Total(), green}} {
+	}{{"기본급", s.Base(), white}, {"성과급", s.Bonus(), gold}, {"오늘 번 돈", s.Total(), green}} {
 		x := f.x + 2 + i*col
 		a.text(x, 7, item.label, style(muted))
 		a.text(x, 8, money(item.value)+" 원", style(item.color).Bold(true))
 	}
-	progress := now.Sub(s.Started).Seconds()
-	progress = progress - float64(s.Ticks)*5
-	progress = max(0, min(5, progress))
-	cells := int(progress * 4)
-	a.text(f.x+2, 10, strings.Repeat("━", cells)+strings.Repeat("·", 20-cells), style(green))
-	a.text(f.x+25, 10, fmt.Sprintf("다음 입금 %.1fs", 5-progress), style(muted))
-	a.text(f.x+f.w-24, 10, "5초치 급여 자동 적립", style(muted))
+	interval := game.PayInterval.Seconds()
+	progress := max(0, min(interval, now.Sub(s.Started).Seconds()-float64(s.Ticks)*interval))
+	cells := int(progress / interval * 18)
+	gauge := "[" + strings.Repeat("=", cells) + strings.Repeat("-", 18-cells) + "]"
+	gaugeX := f.x + 2
+	a.text(gaugeX, 10, gauge, style(green))
+	a.text(gaugeX+len(gauge)+2, 10, fmt.Sprintf("다음 입금 %.0fs", math.Ceil(interval-progress)), style(muted))
+	a.text(f.x+f.w-24, 10, "1분치 급여 자동 적립", style(muted))
 	a.drawScene(now)
 	if now.Before(a.toastUntil) {
 		a.center(12, a.toast, style(gold).Bold(true))
 	} else if s.BonusActive {
 		a.center(12, "BONUS DROP · 금색 지폐를 클릭하세요!", style(gold).Bold(true))
 	}
-	a.center(f.y+f.h-1, "작은 지폐는 풍경, 금색 지폐는 기회.  클릭 / Space 수령", style(muted))
 }
 func (a *App) drawResult() {
 	f := a.frame()
 	s := a.session
 	y := a.formY()
 	w, _ := a.screen.Size()
-	a.text(f.x+f.w-16, 2, "■ SETTLED / 03", style(muted))
-	a.center(6, "오늘도, 돈이 조금 더 쌓였습니다.", style(green).Bold(true))
+	a.text(f.x+f.w-10, 2, "■ SETTLED / 03", style(muted))
+	a.center(6, "신난다! 퇴근이다!", style(green).Bold(true))
 	reason := "직접 종료"
 	if s.Ended.Equal(s.Deadline) {
 		reason = "18:00 퇴근 완료"
@@ -188,30 +185,33 @@ func (a *App) drawResult() {
 		label string
 		value int64
 		color tcell.Color
-	}{{"기본급", s.Base(), white}, {fmt.Sprintf("성과급 · %d회", s.BonusCount), s.Bonus(), gold}, {"합계", s.Total(), green}} {
+	}{{"기본급", s.Base(), white}, {fmt.Sprintf("성과급 · %d회", s.BonusCount), s.Bonus(), gold}, {"오늘 번 돈", s.Total(), green}} {
 		yy := y + 3 + i*2
 		a.text(w/2-22, yy, item.label, style(item.color))
 		v := money(item.value) + " 원"
 		a.text(w/2+22-runewidth.StringWidth(v), yy, v, style(item.color).Bold(true))
 	}
 	a.rule(w/2-22, y+6, 44)
-	a.button(a.startRect(), "처음으로 돌아가기 Enter", true)
+	a.button(a.startRect(), "다시 출근하기...", true)
 	_, height := a.screen.Size()
-	if height >= 28 {
-		a.center(y+14, "가만히 있었던 시간도, 쌓이고 있었습니다.", style(white))
-		a.center(y+16, "정산 금액은 원 미만 절사 · 마지막 5초 미만은 미적립", style(muted))
-	} else {
-		a.center(height-2, "원 미만 절사 · 마지막 5초 미만 미적립", style(muted))
+	greeting := "고생하셨어요, 내일 봐요!"
+	if s.Started.Weekday() == time.Friday {
+		greeting = "고생하셨어요, 다음 주에 봐요!"
 	}
+	a.center(min(y+14, height-2), greeting, style(white))
 	a.center(f.y+f.h-2, "Enter 새로 시작   Esc 닫기", style(muted))
 }
 
-// Two square pixels per terminal cell, using the upper-half block.
-func (a *App) bill(x, y int, big bool, tint int) {
-	w, h := 12, 6
+func billSize(big bool) (int, int) {
 	if big {
-		w, h = 22, 10
+		return 11, 5
 	}
+	return 6, 3
+}
+
+// Two square pixels per terminal cell; odd heights use only the upper pixel.
+func (a *App) bill(x, y int, big bool, tint int) {
+	w, h := billSize(big)
 	colors := []tcell.Color{bg, tcell.NewHexColor(0x2c6c46), tcell.NewHexColor(0x63b77b), tcell.NewHexColor(0xc7efaa)}
 	if tint == 1 {
 		colors = []tcell.Color{bg, tcell.NewHexColor(0x244b36), tcell.NewHexColor(0x3e7752), tcell.NewHexColor(0x83ab70)}
@@ -220,6 +220,9 @@ func (a *App) bill(x, y int, big bool, tint int) {
 		colors = []tcell.Color{bg, tcell.NewHexColor(0x9e7130), gold, tcell.NewHexColor(0xfff0b7)}
 	}
 	pixel := func(px, py int) tcell.Color {
+		if py >= h {
+			return bg
+		}
 		if (px == 0 || px == w-1) && (py == 0 || py == h-1) {
 			return colors[0]
 		}
@@ -237,9 +240,7 @@ func (a *App) bill(x, y int, big bool, tint int) {
 		}
 	}
 	if big {
-		a.text(x+5, y+2, "BONUS +30m", style(bg).Background(gold).Bold(true))
-	} else {
-		a.text(x+5, y+1, "W", style(bg).Background(colors[2]))
+		a.text(x+3, y+1, "+30m", style(bg).Background(gold).Bold(true))
 	}
 }
 func (a *App) drawScene(now time.Time) {
@@ -253,17 +254,17 @@ func (a *App) drawScene(now time.Time) {
 	}
 	for _, n := range a.notes {
 		p := max(0, min(1, now.Sub(n.born).Seconds()/n.duration.Seconds()))
-		x := f.x + 2 + int(n.x*float64(f.w-16))
-		y := 13 + int(p*float64(max(1, floor-13-3)))
+		x := f.x + 2 + int(n.x*float64(f.w-10))
+		y := 13 + int(p*float64(max(1, floor-13-2)))
 		a.bill(x, y, false, 0)
 	}
 	// Layered, deterministic stacks stay stable between frames.
-	for row := h - 5; row >= floor; row -= 2 {
-		for x := f.x + 1; x+12 < f.x+f.w; x += 10 {
+	for row := h - 5; row >= floor; row-- {
+		for x := f.x + 1; x+6 < f.x+f.w; x += 5 {
 			a.bill(x+(row%2), row, false, 1)
 		}
 	}
-	for x := f.x + 2; x+12 < f.x+f.w; x += 13 {
+	for x := f.x + 2; x+6 < f.x+f.w; x += 7 {
 		a.bill(x, floor+(x%3)/2, false, 0)
 	}
 	if a.session.BonusActive {

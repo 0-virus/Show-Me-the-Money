@@ -6,7 +6,7 @@ import (
 )
 
 func morning() time.Time { return time.Date(2026, 11, 6, 9, 0, 0, 0, time.FixedZone("KST", 9*3600)) }
-func TestSalaryAndFiveSecondAccrual(t *testing.T) {
+func TestSalaryAndMinuteAccrual(t *testing.T) {
 	for _, annual := range []bool{false, true} {
 		salary := int64(3600000)
 		if annual {
@@ -19,20 +19,20 @@ func TestSalaryAndFiveSecondAccrual(t *testing.T) {
 		if s.Monthly() != 3600000 || s.Hourly() != 20000 {
 			t.Fatalf("conversion: %+v", s)
 		}
-		s.Advance(morning().Add(4999 * time.Millisecond))
+		s.Advance(morning().Add(59999 * time.Millisecond))
 		if s.Base() != 0 {
-			t.Fatal("paid before 5 seconds")
+			t.Fatal("paid before 60 seconds")
 		}
-		s.Advance(morning().Add(5 * time.Second))
-		if s.Base() != 27 {
+		s.Advance(morning().Add(60 * time.Second))
+		if s.Base() != 333 {
 			t.Fatal(s.Base())
 		}
-		s.Advance(morning().Add(17 * time.Second))
-		if s.Base() != 83 {
+		s.Advance(morning().Add(190 * time.Second))
+		if s.Base() != 1000 {
 			t.Fatal("missed elapsed ticks", s.Base())
 		}
-		s.Advance(morning().Add(6 * time.Second))
-		if s.Base() != 83 {
+		s.Advance(morning().Add(70 * time.Second))
+		if s.Base() != 1000 {
 			t.Fatal("clock reversal removed money")
 		}
 	}
@@ -65,14 +65,14 @@ func TestInvalidSalary(t *testing.T) {
 	}
 }
 func TestDeadlineAndLateResume(t *testing.T) {
-	start := time.Date(2026, 11, 6, 17, 59, 48, 0, time.UTC)
+	start := time.Date(2026, 11, 6, 17, 58, 48, 0, time.UTC)
 	s, _ := New(3600000, false, start)
 	s.Advance(start.Add(time.Hour))
-	if !s.Finished || s.Base() != 55 || !s.Ended.Equal(s.Deadline) {
+	if !s.Finished || s.Base() != 333 || !s.Ended.Equal(s.Deadline) {
 		t.Fatalf("deadline not capped: %+v", s)
 	}
 	s.Advance(start.Add(2 * time.Hour))
-	if s.Base() != 55 {
+	if s.Base() != 333 {
 		t.Fatal("paid after finish")
 	}
 	for _, hour := range []int{18, 22} {
@@ -102,7 +102,7 @@ func TestBonusOnlyOnceAndBeforeLanding(t *testing.T) {
 		t.Fatal("claimed landed bonus")
 	}
 	s.Finish(morning().Add(21 * time.Second))
-	if s.Base() != 111 || s.Total() != 10111 {
+	if s.Base() != 0 || s.Total() != 10000 {
 		t.Fatal("wrong result", s.Total())
 	}
 	if s.SpawnBonus(morning().Add(22*time.Second), time.Second) {
@@ -111,9 +111,9 @@ func TestBonusOnlyOnceAndBeforeLanding(t *testing.T) {
 }
 func TestFinishFreezesAndBonusCannotCrossDeadline(t *testing.T) {
 	s, _ := New(3600000, false, morning())
-	s.Finish(morning().Add(9 * time.Second))
-	s.Finish(morning().Add(20 * time.Second))
-	if s.Base() != 27 || !s.Ended.Equal(morning().Add(9*time.Second)) {
+	s.Finish(morning().Add(65 * time.Second))
+	s.Finish(morning().Add(140 * time.Second))
+	if s.Base() != 333 || !s.Ended.Equal(morning().Add(65*time.Second)) {
 		t.Fatal("finish not idempotent")
 	}
 	n, _ := New(3600000, false, morning())

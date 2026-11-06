@@ -55,6 +55,10 @@ func TestRendererSnapshots(t *testing.T) {
 	input(a, "3600000")
 	a.Draw()
 	saveSnapshot(t, s, "intro")
+	key(a, tcell.KeyEscape)
+	a.Draw()
+	saveSnapshot(t, s, "intro-confirm")
+	key(a, tcell.KeyEscape)
 	key(a, tcell.KeyEnter)
 	for i := 0; i < 40; i++ {
 		*now = now.Add(300 * time.Millisecond)
@@ -69,8 +73,11 @@ func TestRendererSnapshots(t *testing.T) {
 	input(a, " ")
 	key(a, tcell.KeyEscape)
 	a.Draw()
+	saveSnapshot(t, s, "game-confirm")
+	input(a, "y")
+	a.Draw()
 	saveSnapshot(t, s, "result")
-	s.SetSize(76, 28)
+	s.SetSize(80, 24)
 	a.Draw()
 	saveSnapshot(t, s, "small-result")
 }

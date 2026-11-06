@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const PayInterval = time.Minute
+
 // Session owns salary, elapsed-time accrual and one collectible bonus.
 type Session struct {
 	Started                    time.Time
@@ -37,8 +39,8 @@ func (s *Session) Monthly() int64       { return s.Salary / s.monthDiv }
 func (s *Session) Hourly() int64        { return s.Salary / (s.monthDiv * 180) }
 func (s *Session) HourlyExact() float64 { return float64(s.Salary) / float64(s.monthDiv*180) }
 
-// Keep the numerator exact until display; never truncate each five-second payment.
-func (s *Session) Base() int64  { return s.Salary * s.Ticks / (s.monthDiv * 180 * 720) }
+// Keep the numerator exact until display; never truncate each minute's payment.
+func (s *Session) Base() int64  { return s.Salary * s.Ticks / (s.monthDiv * 180 * 60) }
 func (s *Session) Bonus() int64 { return s.Salary * s.BonusCount / (s.monthDiv * 360) }
 func (s *Session) Total() int64 { return s.Base() + s.Bonus() }
 func (s *Session) Advance(now time.Time) {
@@ -50,7 +52,7 @@ func (s *Session) Advance(now time.Time) {
 	if cutoff.After(s.Deadline) {
 		cutoff = s.Deadline
 	}
-	ticks := int64(cutoff.Sub(s.Started) / (5 * time.Second))
+	ticks := int64(cutoff.Sub(s.Started) / PayInterval)
 	if ticks > s.Ticks {
 		s.Ticks = ticks
 	}

@@ -29,22 +29,24 @@ type note struct {
 	duration time.Duration
 }
 type App struct {
-	screen     tcell.Screen
-	now        func() time.Time
-	random     *rand.Rand
-	page       page
-	message    string
-	session    *game.Session
-	nextBonus  time.Time
-	amount     string
-	annual     bool
-	quit       bool
-	mouseDown  bool
-	bonusX     float64
-	nextNote   time.Time
-	notes      []note
-	toastUntil time.Time
-	toast      string
+	screen      tcell.Screen
+	now         func() time.Time
+	random      *rand.Rand
+	page        page
+	message     string
+	session     *game.Session
+	nextBonus   time.Time
+	amount      string
+	annual      bool
+	quit        bool
+	mouseDown   bool
+	bonusX      float64
+	nextNote    time.Time
+	notes       []note
+	toastUntil  time.Time
+	toast       string
+	confirmExit bool
+	confirmYes  bool
 }
 
 func New(s tcell.Screen, now func() time.Time, r *rand.Rand) *App {
@@ -76,7 +78,7 @@ func (a *App) back()                     { a.page = intro; a.session = nil; a.me
 func (a *App) claim(now time.Time) {
 	before := a.session.Bonus()
 	if a.session.ClaimBonus(now) {
-		a.toast = fmt.Sprintf("성과급 +%s원!  30분의 여유를 얻었습니다.", money(a.session.Bonus()-before))
+		a.toast = fmt.Sprintf("성과급 %s원 지급 완료!", money(a.session.Bonus()-before))
 		a.toastUntil = now.Add(3 * time.Second)
 	}
 }
@@ -84,6 +86,10 @@ func (a *App) Handle(ev tcell.Event) {
 	now := a.now()
 	// Settle before processing input, including an input arriving at exactly 18:00.
 	a.Tick()
+	if a.confirmExit {
+		a.handleConfirmation(ev, now)
+		return
+	}
 	switch e := ev.(type) {
 	case *tcell.EventResize:
 		a.screen.Sync()
@@ -112,7 +118,7 @@ func (a *App) Handle(ev tcell.Event) {
 				}
 				a.message = ""
 			case tcell.KeyEscape:
-				a.quit = true
+				a.requestExit()
 			case tcell.KeyRune:
 				if unicode.IsPrint(e.Rune()) && len([]rune(a.amount)) < 20 {
 					a.amount += string(e.Rune())
@@ -121,8 +127,7 @@ func (a *App) Handle(ev tcell.Event) {
 			}
 		case playing:
 			if e.Key() == tcell.KeyEscape || e.Key() == tcell.KeyRune && (e.Rune() == 'q' || e.Rune() == 'Q') {
-				a.session.Finish(now)
-				a.page = result
+				a.requestExit()
 			}
 			if a.largeEnough() && e.Key() == tcell.KeyRune && e.Rune() == ' ' {
 				a.claim(now)
@@ -156,8 +161,7 @@ func (a *App) Handle(ev tcell.Event) {
 			}
 		case playing:
 			if a.stopRect().contains(x, y) {
-				a.session.Finish(now)
-				a.page = result
+				a.requestExit()
 				return
 			}
 			if a.session.BonusActive && a.bonusRect(now).contains(x, y) {
@@ -178,6 +182,7 @@ func (a *App) Tick() {
 	a.session.Advance(now)
 	if a.session.Finished {
 		a.page = result
+		a.confirmExit = false
 		return
 	}
 	if !now.Before(a.nextBonus) {
@@ -238,13 +243,15 @@ func (a *App) bonusRect(now time.Time) rect {
 	floor := a.floor()
 	progress := now.Sub(a.session.BonusStarted).Seconds() / 10
 	progress = max(0, min(progress, 1))
-	return rect{f.x + 2 + int(a.bonusX*float64(f.w-26)), 13 + int(progress*float64(max(1, floor-13-5))), 22, 5}
+	w, pixels := billSize(true)
+	h := (pixels + 1) / 2
+	return rect{f.x + 2 + int(a.bonusX*float64(f.w-w-4)), 13 + int(progress*float64(max(1, floor-13-h))), w, h}
 }
 func (a *App) floor() int {
 	_, h := a.screen.Size()
 	extra := 0
 	if a.session != nil {
-		extra = min(3, max(0, h-26), int(a.session.Ticks/60))
+		extra = min(3, max(0, h-26), int(a.session.Ticks/5))
 	}
 	return h - 5 - extra
 }

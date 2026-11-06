@@ -55,13 +55,14 @@ func TestInputPlayResultAndRestart(t *testing.T) {
 	if a.page != playing {
 		t.Fatal("did not start", a.message)
 	}
-	*now = now.Add(10 * time.Second)
+	*now = now.Add(60 * time.Second)
 	a.Tick()
 	a.Draw()
-	if a.session.Base() != 55 || !strings.Contains(dump(s), "55") {
+	if a.session.Base() != 333 || !strings.Contains(dump(s), "333") {
 		t.Fatal("income not rendered")
 	}
 	key(a, tcell.KeyEscape)
+	input(a, "y")
 	a.Draw()
 	if a.page != result || !strings.Contains(dump(s), "기본급") {
 		t.Fatal("missing result")
