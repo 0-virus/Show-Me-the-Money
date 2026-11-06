@@ -22,19 +22,19 @@
 ## Task 1: 규칙
 Files: internal/game/game.go, internal/game/game_test.go, go.mod
 Interface: New(salary int64, annual bool, now time.Time) (*Session,error), Advance(now), Finish(now), ClaimBonus(now), Base(), Bonus(), Total(), Hourly(), Monthly().
-- [ ] 월/연봉 환산, 5초 경계, 지연된 여러 틱, 마감 경계, 중복 보너스 실패 테스트 작성 및 실패 확인.
-- [ ] 정수 기반 모델 구현, 전체 테스트 통과, 커밋.
+- [x] 월/연봉 환산, 5초 경계, 지연된 여러 틱, 마감 경계, 중복 보너스 실패 테스트 작성 및 실패 확인.
+- [x] 정수 기반 모델 구현, 전체 테스트 통과, 커밋.
 
 ## Task 2: 터미널 게임
 Files: internal/terminal/app.go, render.go, app_test.go, cmd/moneycopy/main.go
 Interface: New(screen tcell.Screen, now func() time.Time, random *rand.Rand), Handle(event), Tick(), Draw(), Run().
-- [ ] 초기→게임→결과→초기, 입력 오류, 클릭, 리사이즈 시뮬레이션 테스트 및 실패 확인.
-- [ ] 입력, 상태바, 낙하 지폐, 지폐더미, 성과급 히트박스 구현.
-- [ ] 테스트·빌드 및 실제 EXE 플레이, 커밋.
+- [x] 초기→게임→결과→초기, 입력 오류, 클릭, 리사이즈 시뮬레이션 테스트 및 실패 확인.
+- [x] 입력, 상태바, 낙하 지폐, 지폐더미, 성과급 히트박스 구현.
+- [x] 테스트·빌드 및 실제 EXE 플레이, 커밋.
 
 ## Task 3: 배포
 Files: scripts/build.ps1, scripts/package.py, README.md, docs/verification.md
-- [ ] Windows amd64/arm64, Mac amd64/arm64 교차 빌드.
-- [ ] Universal Mach-O, 앱 실행기, OS별 디렉토리/ZIP 생성.
-- [ ] 패키지 헤더·권한·무결성, 전체 테스트/vet, 배포 EXE 확인.
-- [ ] 설명서와 검증 결과 기록, 독립 리뷰·필요 수정, 커밋.
+- [x] Windows amd64, Mac amd64/arm64 교차 빌드.
+- [x] Universal Mach-O, 앱 실행기, OS별 디렉토리/ZIP 생성.
+- [x] 패키지 헤더·권한·무결성, 전체 테스트/vet, 배포 EXE 확인.
+- [x] 설명서와 검증 결과 기록, 독립 리뷰·필요 수정, 커밋.

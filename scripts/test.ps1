@@ -4,6 +4,9 @@ Set-Location (Split-Path $PSScriptRoot -Parent)
 $go = if (Test-Path '.tools/go/bin/go.exe') { (Resolve-Path '.tools/go/bin/go.exe').Path } else { 'go' }
 $env:GOCACHE="$PWD/.tools/gocache"
 $env:GOMODCACHE="$PWD/.tools/gomodcache"
+$savedGoOS=$env:GOOS
+$savedGoArch=$env:GOARCH
+try {
 if ($Wasm) {
     $env:GOOS='js'; $env:GOARCH='wasm'
     $goroot = & $go env GOROOT
@@ -18,4 +21,8 @@ if ($Wasm) {
 } else {
     & $go test ./... -count=1
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed' }
+}
+} finally {
+    $env:GOOS=$savedGoOS
+    $env:GOARCH=$savedGoArch
 }
