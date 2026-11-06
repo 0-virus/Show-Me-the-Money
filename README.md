@@ -2,13 +2,17 @@
 
 현실과 같은 속도로 급여가 쌓이는, 설치 없이 즐기는 터미널 방치형 게임.
 
-## npm으로 실행 (패키지 게시 후)
+## npm으로 바로 실행
 
-Node.js 20 이상과 npm이 있다면 터미널에서 실행할 수 있습니다. Go나 Python은 플레이에 필요하지 않습니다.
+Node.js 20 이상과 npm이 설치되어 있다면 PowerShell 또는 터미널에서 아래 명령을 실행하세요. 게임 ZIP을 따로 내려받거나 Go·Python을 설치할 필요는 없습니다.
 
 ```sh
 npx @halmasy1/moneycopy@latest
 ```
+
+처음 실행할 때 패키지 설치 여부를 물으면 `y`를 입력하세요. 게임을 자동으로 다운로드해 npm 캐시에 저장한 뒤 시작합니다. 별도 수동 설치는 필요 없지만, 최초 다운로드와 `@latest` 버전 확인에는 인터넷 연결이 필요합니다.
+
+게임이 열리면 월급 또는 연봉을 선택하고 금액을 입력한 뒤 Enter를 누르세요. 플레이 중 Esc를 누르면 퇴근 확인 후 결과를 볼 수 있습니다.
 
 개발 소스 폴더에서도 공개 배포본을 실행하도록 `@latest`를 명시합니다. 이를 생략하면 npm이 현재 프로젝트를 같은 이름의 로컬 패키지로 선택해 Windows에서 `moneycopy` 명령을 찾지 못할 수 있습니다.
 
@@ -21,7 +25,7 @@ moneycopy
 
 지원 환경은 Windows x64, macOS 13 이상 Intel/Apple Silicon입니다. OS별 실행 파일이 패키지에 함께 들어 있으며 실행기가 자동 선택합니다. Linux 및 Windows ARM64용 Node는 지원하지 않습니다. Mac 실기기 실행은 미검증입니다.
 
-## 실행
+## 실행 파일로 플레이
 
 - **Windows 10/11 (64비트)**: `MoneyCopy-Windows-v1.0.3.zip`을 풀고 `Windows/MoneyCopy.exe`를 실행합니다.
 - **macOS 13 이상 (Intel / Apple Silicon)**: **Mac에서** `MoneyCopy-macOS-v1.0.3.zip`을 풀고 `macOS/MoneyCopy.app`을 실행합니다. 기본 Terminal 앱에서 게임이 열립니다. ZIP에 실행 권한이 보존되어 있으므로 Windows에서 압축을 푼 폴더를 복사하는 대신 ZIP 자체를 Mac에 옮겨 주세요.
