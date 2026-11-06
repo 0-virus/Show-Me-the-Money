@@ -7,8 +7,10 @@
 Node.js 20 이상과 npm이 있다면 터미널에서 실행할 수 있습니다. Go나 Python은 플레이에 필요하지 않습니다.
 
 ```sh
-npx @halmasy1/moneycopy
+npx @halmasy1/moneycopy@latest
 ```
+
+개발 소스 폴더에서도 공개 배포본을 실행하도록 `@latest`를 명시합니다. 이를 생략하면 npm이 현재 프로젝트를 같은 이름의 로컬 패키지로 선택해 Windows에서 `moneycopy` 명령을 찾지 못할 수 있습니다.
 
 계속 설치해 두고 실행하려면:
 
