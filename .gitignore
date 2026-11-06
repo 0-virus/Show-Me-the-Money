@@ -1,0 +1,6 @@
+.tools/
+.superpowers/
+dist/
+artifacts/
+*.test
+*.exe
