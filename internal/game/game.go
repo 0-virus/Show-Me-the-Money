@@ -19,6 +19,7 @@ type Session struct {
 }
 
 func New(salary int64, annual bool, now time.Time) (*Session, error) {
+	now = now.Round(0) // Wall time includes system sleep, including on macOS.
 	if salary <= 0 || salary > 1_000_000_000_000 {
 		return nil, errors.New("1원부터 1조 원까지 숫자로 입력해 주세요")
 	}
@@ -41,6 +42,7 @@ func (s *Session) Base() int64  { return s.Salary * s.Ticks / (s.monthDiv * 180 
 func (s *Session) Bonus() int64 { return s.Salary * s.BonusCount / (s.monthDiv * 360) }
 func (s *Session) Total() int64 { return s.Base() + s.Bonus() }
 func (s *Session) Advance(now time.Time) {
+	now = now.Round(0)
 	if s.Finished {
 		return
 	}
@@ -62,6 +64,7 @@ func (s *Session) Advance(now time.Time) {
 	}
 }
 func (s *Session) Finish(now time.Time) {
+	now = now.Round(0)
 	s.Advance(now)
 	if s.Finished {
 		return
@@ -74,6 +77,7 @@ func (s *Session) Finish(now time.Time) {
 	}
 }
 func (s *Session) SpawnBonus(now time.Time, duration time.Duration) bool {
+	now = now.Round(0)
 	s.Advance(now)
 	if s.Finished || s.BonusActive || duration <= 0 {
 		return false
@@ -84,6 +88,7 @@ func (s *Session) SpawnBonus(now time.Time, duration time.Duration) bool {
 	return true
 }
 func (s *Session) ClaimBonus(now time.Time) bool {
+	now = now.Round(0)
 	s.Advance(now)
 	if s.Finished || !s.BonusActive || now.Before(s.BonusStarted) {
 		return false

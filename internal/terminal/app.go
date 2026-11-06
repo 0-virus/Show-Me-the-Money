@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 type page int
@@ -47,7 +48,7 @@ type App struct {
 }
 
 func New(s tcell.Screen, now func() time.Time, r *rand.Rand) *App {
-	return &App{screen: s, now: now, random: r}
+	return &App{screen: &bufferedScreen{Screen: s}, now: func() time.Time { return now().Round(0) }, random: r}
 }
 func (a *App) start() {
 	n, err := strconv.ParseInt(strings.ReplaceAll(a.amount, ",", ""), 10, 64)
@@ -106,13 +107,14 @@ func (a *App) Handle(ev tcell.Event) {
 				a.message = ""
 			case tcell.KeyBackspace, tcell.KeyBackspace2:
 				if len(a.amount) > 0 {
-					a.amount = a.amount[:len(a.amount)-1]
+					runes := []rune(a.amount)
+					a.amount = string(runes[:len(runes)-1])
 				}
 				a.message = ""
 			case tcell.KeyEscape:
 				a.quit = true
 			case tcell.KeyRune:
-				if (e.Rune() >= '0' && e.Rune() <= '9' || e.Rune() == ',') && len(a.amount) < 20 {
+				if unicode.IsPrint(e.Rune()) && len([]rune(a.amount)) < 20 {
 					a.amount += string(e.Rune())
 					a.message = ""
 				}

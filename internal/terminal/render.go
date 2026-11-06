@@ -119,7 +119,7 @@ func (a *App) drawIntro() {
 	}
 	a.fill(rect{w/2 - 22, y + 5, 44, 2}, style(white).Background(panel))
 	a.text(w/2-20, y+5, amount, st.Bold(true))
-	a.screen.ShowCursor(w/2-20+len(a.amount), y+5)
+	a.screen.ShowCursor(w/2-20+runewidth.StringWidth(a.amount), y+5)
 	n, err := strconv.ParseInt(strings.ReplaceAll(a.amount, ",", ""), 10, 64)
 	if err == nil {
 		if s, e := game.New(n, a.annual, a.now()); e == nil {
@@ -130,8 +130,13 @@ func (a *App) drawIntro() {
 		a.center(y+8, a.message, style(red))
 	}
 	a.button(a.startRect(), "돈 복사 시작 Enter", true)
-	a.center(y+14, "현실과 같은 속도로. 당신의 5초도 돈이 됩니다.", style(white))
-	a.center(y+16, "금색 지폐를 잡으면 30분치 급여가 성과급으로!", style(gold))
+	_, height := a.screen.Size()
+	if height >= 28 {
+		a.center(y+14, "현실과 같은 속도로. 당신의 5초도 돈이 됩니다.", style(white))
+		a.center(y+16, "금색 지폐를 잡으면 30분치 급여가 성과급으로!", style(gold))
+	} else {
+		a.center(height-2, "금색 지폐 클릭: 30분치 급여  ·  5초마다 자동 입금", style(gold))
+	}
 	a.center(f.y+f.h-2, "Tab 월급/연봉   Enter 시작   Ctrl+U 입력 지우기   Esc 닫기", style(muted))
 }
 func (a *App) drawGame() {
@@ -191,8 +196,13 @@ func (a *App) drawResult() {
 	}
 	a.rule(w/2-22, y+6, 44)
 	a.button(a.startRect(), "처음으로 돌아가기 Enter", true)
-	a.center(y+14, "가만히 있었던 시간도, 쌓이고 있었습니다.", style(white))
-	a.center(y+16, "정산 금액은 원 미만 절사 · 마지막 5초 미만은 미적립", style(muted))
+	_, height := a.screen.Size()
+	if height >= 28 {
+		a.center(y+14, "가만히 있었던 시간도, 쌓이고 있었습니다.", style(white))
+		a.center(y+16, "정산 금액은 원 미만 절사 · 마지막 5초 미만은 미적립", style(muted))
+	} else {
+		a.center(height-2, "원 미만 절사 · 마지막 5초 미만 미적립", style(muted))
+	}
 	a.center(f.y+f.h-2, "Enter 새로 시작   Esc 닫기", style(muted))
 }
 

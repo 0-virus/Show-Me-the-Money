@@ -122,3 +122,21 @@ func TestFinishFreezesAndBonusCannotCrossDeadline(t *testing.T) {
 		t.Fatal("claimed after cutoff")
 	}
 }
+
+func TestSessionUsesWallClockAcrossSleep(t *testing.T) {
+	now := time.Now()
+	morning := time.Date(now.Year(), now.Month(), now.Day(), 9, 0, 0, 0, now.Location())
+	now = now.Add(morning.Sub(now))
+	s, _ := New(3600000, false, now)
+	if s.Started != now.Round(0) {
+		t.Fatal("session retained suspend-sensitive monotonic clock")
+	}
+	s.SpawnBonus(now, 10*time.Second)
+	if s.BonusExpires != now.Add(10*time.Second).Round(0) {
+		t.Fatal("bonus retained monotonic clock")
+	}
+	s.Advance(now.Round(0).Add(time.Minute))
+	if s.BonusActive || s.Base() != 333 {
+		t.Fatal("wall clock resume did not expire bonus and credit time")
+	}
+}

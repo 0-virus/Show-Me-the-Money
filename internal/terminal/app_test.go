@@ -158,3 +158,35 @@ func TestDefaultTerminalSizeCanStart(t *testing.T) {
 		t.Fatal("default 80x24 terminal cannot play")
 	}
 }
+
+func TestInvalidSalaryIsNotSilentlyRewritten(t *testing.T) {
+	for _, bad := range []string{"-3600000", "3.6", "1e6"} {
+		a, _, _ := setup(t)
+		input(a, bad)
+		key(a, tcell.KeyEnter)
+		if a.page != intro || a.message == "" {
+			t.Fatalf("accepted malformed input %q", bad)
+		}
+	}
+}
+
+type countingScreen struct {
+	tcell.Screen
+	writes int
+}
+
+func (s *countingScreen) SetContent(x, y int, r rune, c []rune, st tcell.Style) {
+	s.writes++
+	s.Screen.SetContent(x, y, r, c, st)
+}
+func TestUnchangedFrameDoesNotRepaintTerminal(t *testing.T) {
+	_, s, now := setup(t)
+	counter := &countingScreen{Screen: s}
+	a := New(counter, func() time.Time { return *now }, rand.New(rand.NewSource(2)))
+	a.Draw()
+	before := counter.writes
+	a.Draw()
+	if counter.writes != before {
+		t.Fatal("unchanged frame still sends cells to terminal")
+	}
+}
