@@ -2,15 +2,27 @@
 
 현실과 같은 속도로 급여가 쌓이는, 설치 없이 즐기는 터미널 방치형 게임.
 
+## npm으로 실행 (패키지 게시 후)
+
+Node.js 20 이상과 npm이 있다면 터미널에서 실행할 수 있습니다. Go나 Python은 플레이에 필요하지 않습니다.
+
+```sh
+npx @halmasy1/moneycopy
+```
+
+계속 설치해 두고 실행하려면:
+
+```sh
+npm install -g @halmasy1/moneycopy
+moneycopy
+```
+
+지원 환경은 Windows x64, macOS 13 이상 Intel/Apple Silicon입니다. OS별 실행 파일이 패키지에 함께 들어 있으며 실행기가 자동 선택합니다. Linux 및 Windows ARM64용 Node는 지원하지 않습니다. Mac 실기기 실행은 미검증입니다.
+
 ## 실행
 
-<<<<<<< HEAD
-- **Windows 10/11 (64비트)**: `MoneyCopy-Windows-v1.0.3.zip`을 풀고 `Windows/MoneyCopy.exe`를 더블클릭합니다.
-- **macOS 13 이상 (Intel / Apple Silicon)**: **Mac에서** `MoneyCopy-macOS-v1.0.3.zip`을 풀고 `macOS/MoneyCopy.app`을 더블클릭합니다. 기본 Terminal 앱에서 게임이 열립니다. ZIP에 실행 권한이 보존되어 있으므로 Windows에서 압축을 푼 폴더를 복사하는 대신 ZIP 자체를 Mac에 옮겨 주세요.
-=======
-- **Windows 10/11 (64비트)**: `MoneyCopy-Windows-v1.2.0.zip`을 풀고 `Windows/MoneyCopy.exe`를 실행합니다.
-- **macOS 13 이상 (Intel / Apple Silicon)**: **Mac에서** `MoneyCopy-macOS-v1.2.0.zip`을 풀고 `macOS/MoneyCopy.app`을 실행합니다. 기본 Terminal 앱에서 게임이 열립니다. ZIP에 실행 권한이 보존되어 있으므로 Windows에서 압축을 푼 폴더를 복사하는 대신 ZIP 자체를 Mac에 옮겨 주세요.
->>>>>>> 2419275ad1f64e9fd39b0faa1c4f931a731a7839
+- **Windows 10/11 (64비트)**: `MoneyCopy-Windows-v1.0.3.zip`을 풀고 `Windows/MoneyCopy.exe`를 실행합니다.
+- **macOS 13 이상 (Intel / Apple Silicon)**: **Mac에서** `MoneyCopy-macOS-v1.0.3.zip`을 풀고 `macOS/MoneyCopy.app`을 실행합니다. 기본 Terminal 앱에서 게임이 열립니다. ZIP에 실행 권한이 보존되어 있으므로 Windows에서 압축을 푼 폴더를 복사하는 대신 ZIP 자체를 Mac에 옮겨 주세요.
 - 인터넷, Go, Python, 별도 게임 런타임 설치는 필요하지 않습니다. 폴더 어디에 두어도 실행할 수 있습니다.
 - 권장 크기 110열 × 36행, 최소 76열 × 24행. 한글을 표시할 수 있는 터미널 글꼴을 사용하세요.
 - 급여는 저장하거나 외부에 전송하지 않습니다. 창을 닫으면 이번 게임 기록은 사라집니다.
@@ -85,3 +97,27 @@ go run ./cmd/moneycopy
 화면 셀 스냅샷은 `MONEYCOPY_SNAPSHOTS` 환경 변수로 경로를 지정하면 테스트가 생성합니다. `scripts/render-snapshots.py`는 개발용 Pillow로 이를 PNG로 그립니다.
 
 테스트 범위와 실제 실행 확인 내용은 `docs/verification.md`에 기록합니다.
+
+## npm 패키지 만들기 및 게시
+
+패키지 이름은 `@halmasy1/moneycopy`, 명령은 `moneycopy`입니다. 준비된 `dist/v1.0.3/` 네이티브 배포 파일을 사용합니다. 새 게임 버전은 Go의 version, scripts/package.py의 VERSION, package.json의 version을 함께 올린 뒤 네이티브 빌드를 다시 만듭니다.
+
+개발 환경에는 Node.js, npm, Python 3이 필요하며, 네이티브 재빌드 시 Go도 필요합니다. 저장소 루트에서:
+
+```sh
+npm test
+npm run pack:release
+python scripts/verify-npm.py
+```
+
+`prepack`은 기존 ZIP 무결성과 버전을 확인한 뒤 `native/`와 의존성 라이선스 파일을 생성합니다. `pack:release`는 npm 압축 파일의 Mac 실행 권한을 보존하도록 마무리하고 실제 파일 목록·바이너리·실행 권한을 검증합니다. npm 설치 시 실행하는 빌드/다운로드 스크립트는 없습니다.
+
+`pack:release`는 로컬 `.tgz`를 만들 뿐 게시하지 않습니다. 폴더에서 바로 `npm publish`를 실행하면 Mac 실행 권한이 다시 빠질 수 있어 안내 후 중단합니다. 검증한 파일을 공개 게시하려면 npm 계정 `halmasy1`으로 로그인한 뒤 다음을 실행합니다.
+
+```sh
+npm login
+npm whoami
+npm publish ./dist/v1.0.3/halmasy1-moneycopy-1.0.3.tgz --access public
+```
+
+로그인 계정의 2단계 인증 안내에 따라 인증을 완료하세요. 패키지 이름과 버전이 이미 게시되어 있다면 같은 버전을 덮어쓸 수 없으므로 버전을 올려야 합니다. 프로젝트 자체 라이선스는 별도로 지정되지 않아 `UNLICENSED`이며, 포함된 제삼자 코드의 라이선스는 `THIRD-PARTY-LICENSES.txt`에 포함됩니다.

@@ -2,6 +2,16 @@
 
 날짜: 2026-11-06. 호스트: Windows x64. Go 1.27.3, tcell v2.13.10.
 
+## npm 배포 구성 (@halmasy1/moneycopy@1.0.3)
+
+- 실행기 테스트 4개: Windows/Mac 플랫폼 선택, 미지원 플랫폼 거부, 공백 포함 경로·인수 원문 전달, 셸 미사용, 터미널 입출력 상속, 누락/권한 오류·종료 상태·SIGINT 처리 검증.
+- npm pack 생성물은 package.json, README, 의존성 라이선스, 실행기, Windows EXE, Mac Universal 바이너리의 6파일만 포함. Go 소스·도구·테스트·개인 설정 제외.
+- 로컬 tarball을 --ignore-scripts로 설치하고 설치된 명령에서 버전 1.0.3 확인. 실제 터미널에서 월급 입력 → 게임 화면/6칸 지폐 → Esc 퇴근 확인 → 결과 → 종료(코드 0) 검증.
+- 리뷰에서 발견한 Mac 0644 실행 권한 문제를 최종 배포 tarball 0755 정규화로 수정. 관리자 소유 설치에서도 실행 시 chmod에 의존하지 않음. npm publish 폴더 직접 호출은 막고 검증된 tarball을 지정하도록 안내.
+- 기존 README에 남아 있던 버전 병합 충돌 표시를 현재 v1.0.3 안내로 정리. 기존 .gitattributes 줄바꿈 규칙 보존.
+- 최종 tarball을 공백 포함 경로에 --ignore-scripts로 설치하고 명령 버전 확인. npm publish <tgz> --dry-run --offline 성공(게시하지 않음). 최종 tarball 파일/바이너리/0755 실행 권한 검증 통과.
+- npm 로그인/공개 게시 및 Mac 실기기 실행은 수행하지 않음.
+
 ## v1.0.3 일반 지폐 가로 확대
 
 - 일반 지폐 내부를 3칸에서 6칸으로 확대(모서리 포함 8열 × 3행). 성과급 지폐는 11열 × 3행 유지.

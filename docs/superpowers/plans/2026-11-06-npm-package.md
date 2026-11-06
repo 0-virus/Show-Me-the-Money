@@ -22,14 +22,14 @@
 ## Task 1: CLI and package preparation
 Files: package.json, bin/moneycopy.cjs, scripts/prepare-npm.py, tests/npm-launcher.test.cjs, .gitignore.
 Interfaces: resolveBinary(platform, arch, root), run(args, options) -> exit code; prepack generates native/ and THIRD-PARTY-LICENSES.txt from dist.
-- [ ] Write failing tests for platform routing, argument forwarding, errors and child status.
-- [ ] Implement launcher and manifest; implement preparation and version checks.
-- [ ] Run node tests and npm pack; inspect actual tar contents and native bytes.
-- [ ] Commit launcher and packaging configuration.
+- [x] Write failing tests for platform routing, argument forwarding, errors and child status.
+- [x] Implement launcher and manifest; implement preparation and version checks.
+- [x] Run node tests and npm pack; inspect actual tar contents and native bytes.
+- [x] Commit launcher and packaging configuration.
 
 ## Task 2: Distribution verification and instructions
 Files: README.md, docs/verification.md, scripts/verify-npm.py.
-- [ ] Install the actual tarball into artifacts/npm-smoke using --ignore-scripts and a local prefix; execute installed shim --version and play in a terminal.
-- [ ] Validate tar allowlist, metadata, native hashes and Mac headers/permissions.
-- [ ] Document preparation, packing, login, publish, npx and global-install commands; label publication as pending.
-- [ ] Perform one fresh code review, resolve material findings, repack final docs and commit.
+- [x] Install the actual tarball into artifacts/npm-smoke using --ignore-scripts and a local prefix; execute installed shim --version and play in a terminal.
+- [x] Validate tar allowlist, metadata, native hashes and Mac headers/permissions.
+- [x] Document preparation, packing, login, publish, npx and global-install commands; label publication as pending.
+- [x] Perform one fresh code review, resolve material findings, repack final docs and commit.

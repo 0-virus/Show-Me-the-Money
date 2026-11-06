@@ -3,3 +3,5 @@
 *.sh text eol=lf
 *.command text eol=lf
 *.md text eol=lf
+bin/*.cjs text eol=lf
+scripts/*.py text eol=lf

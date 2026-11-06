@@ -18,7 +18,9 @@
   "cpu": ["x64", "arm64"],
   "scripts": {
     "test": "node --test tests/npm-launcher.test.cjs",
-    "prepack": "python scripts/prepare-npm.py"
+    "prepack": "python scripts/prepare-npm.py",
+    "pack:release": "python scripts/pack-npm.py",
+    "prepublishOnly": "node scripts/require-release.cjs"
   },
   "publishConfig": {
     "access": "public",

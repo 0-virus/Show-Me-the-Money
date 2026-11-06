@@ -1,7 +1,5 @@
 """Stage verified native releases for npm pack; no downloads or publication."""
 import json
-import os
-from pathlib import Path
 import plistlib
 import re
 import shutil
