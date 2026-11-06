@@ -6,3 +6,7 @@ artifacts/
 *.exe
 
 __pycache__/
+node_modules/
+native/
+THIRD-PARTY-LICENSES.txt
+*.tgz

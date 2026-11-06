@@ -1,0 +1,27 @@
+{
+  "name": "@halmasy1/moneycopy",
+  "version": "1.0.3",
+  "description": "가만히 있어도 돈이 복사가 되면 얼마나 좋을까 — 터미널 방치형 게임",
+  "license": "UNLICENSED",
+  "bin": {
+    "moneycopy": "bin/moneycopy.cjs"
+  },
+  "files": [
+    "bin/",
+    "native/",
+    "THIRD-PARTY-LICENSES.txt"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "os": ["win32", "darwin"],
+  "cpu": ["x64", "arm64"],
+  "scripts": {
+    "test": "node --test tests/npm-launcher.test.cjs",
+    "prepack": "python scripts/prepare-npm.py"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}
