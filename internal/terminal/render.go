@@ -214,7 +214,7 @@ func billSize(big bool) (int, int) {
 	if big {
 		return 11, 3
 	}
-	return 5, 3
+	return 8, 3
 }
 func (a *App) bill(x, y int, big bool, tint int) {
 	w, h := billSize(big)
@@ -239,6 +239,7 @@ func (a *App) bill(x, y int, big bool, tint int) {
 func (a *App) drawScene(now time.Time) {
 	f := a.frame()
 	floor := a.floor()
+	noteW, noteH := billSize(false)
 	_, h := a.screen.Size()
 	for y := 14; y < floor; y += 4 {
 		for x := f.x + 4 + (y%3)*3; x < f.x+f.w-3; x += 13 {
@@ -247,17 +248,17 @@ func (a *App) drawScene(now time.Time) {
 	}
 	for _, n := range a.notes {
 		p := max(0, min(1, now.Sub(n.born).Seconds()/n.duration.Seconds()))
-		x := f.x + 2 + int(n.x*float64(f.w-10))
-		y := 13 + int(p*float64(max(1, floor-13-3)))
+		x := f.x + 2 + int(n.x*float64(max(0, f.w-noteW-4)))
+		y := 13 + int(p*float64(max(1, floor-13-noteH)))
 		a.bill(x, y, false, 0)
 	}
 	// Layered, deterministic stacks stay stable between frames.
 	for row := h - 5; row >= floor; row -= 2 {
-		for x := f.x + 1; x+5 < f.x+f.w; x += 5 {
-			a.bill(x+(row%2), row, false, 1)
+		for x := f.x + 1 + row%2; x+noteW <= f.x+f.w-1; x += noteW {
+			a.bill(x, row, false, 1)
 		}
 	}
-	for x := f.x + 2; x+5 < f.x+f.w; x += 7 {
+	for x := f.x + 2; x+noteW <= f.x+f.w-1; x += noteW + 2 {
 		a.bill(x, floor+(x%3)/2, false, 0)
 	}
 	if a.session.BonusActive {

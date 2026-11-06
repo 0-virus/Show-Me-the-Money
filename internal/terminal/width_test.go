@@ -18,7 +18,7 @@ func TestConnectedArtInKoreanLocale(t *testing.T) {
 	a.screen.Clear()
 	a.bill(5, 5, false, 0)
 	a.screen.Show()
-	for x := 5; x < 10; x++ {
+	for x := 5; x < 13; x++ {
 		r, _, _, width := s.GetContent(x, 5)
 		if r == ' ' || width != 1 {
 			t.Errorf("bill border gap at column %d: %q (width %d)", x, r, width)
