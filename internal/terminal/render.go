@@ -157,11 +157,11 @@ func (a *App) drawGame() {
 	}
 	interval := game.PayInterval.Seconds()
 	progress := max(0, min(interval, now.Sub(s.Started).Seconds()-float64(s.Ticks)*interval))
-	cells := int(progress / interval * 18)
-	gauge := "[" + strings.Repeat("=", cells) + strings.Repeat("-", 18-cells) + "]"
+	cells := int(progress / interval * 12)
+	gauge := "│" + strings.Repeat("█", cells) + strings.Repeat(" ", 12-cells) + "│"
 	gaugeX := f.x + 2
-	a.text(gaugeX, 10, gauge, style(green))
-	a.text(gaugeX+len(gauge)+2, 10, fmt.Sprintf("다음 입금 %.0fs", math.Ceil(interval-progress)), style(muted))
+	a.text(gaugeX, 10, gauge, style(green).Background(panel).Bold(true))
+	a.text(gaugeX+runewidth.StringWidth(gauge)+2, 10, fmt.Sprintf("다음 입금 %.0fs", math.Ceil(interval-progress)), style(muted))
 	a.text(f.x+f.w-24, 10, "1분치 급여 자동 적립", style(muted))
 	a.drawScene(now)
 	if now.Before(a.toastUntil) {
@@ -208,46 +208,32 @@ func (a *App) drawResult() {
 	a.center(f.y+f.h-2, "Enter 새로 시작   Esc 닫기", style(muted))
 }
 
+// Bill dimensions are terminal columns and rows, including the border.
 func billSize(big bool) (int, int) {
 	if big {
-		return 11, 5
+		return 11, 3
 	}
-	return 6, 3
+	return 5, 3
 }
-
-// Two square pixels per terminal cell; odd heights use only the upper pixel.
 func (a *App) bill(x, y int, big bool, tint int) {
 	w, h := billSize(big)
-	colors := []tcell.Color{bg, tcell.NewHexColor(0x2c6c46), tcell.NewHexColor(0x63b77b), tcell.NewHexColor(0xc7efaa)}
+	color := green
 	if tint == 1 {
-		colors = []tcell.Color{bg, tcell.NewHexColor(0x244b36), tcell.NewHexColor(0x3e7752), tcell.NewHexColor(0x83ab70)}
+		color = muted
 	}
 	if big {
-		colors = []tcell.Color{bg, tcell.NewHexColor(0x9e7130), gold, tcell.NewHexColor(0xfff0b7)}
+		color = gold
 	}
-	pixel := func(px, py int) tcell.Color {
-		if py >= h {
-			return bg
-		}
-		if (px == 0 || px == w-1) && (py == 0 || py == h-1) {
-			return colors[0]
-		}
-		if px == 0 || px == w-1 || py == 0 || py == h-1 {
-			return colors[1]
-		}
-		if px == 2 || px == w-3 || py == 2 || py == h-3 {
-			return colors[3]
-		}
-		return colors[2]
-	}
-	for py := 0; py < h; py += 2 {
-		for px := 0; px < w; px++ {
-			a.screen.SetContent(x+px, y+py/2, '▀', nil, tcell.StyleDefault.Foreground(pixel(px, py)).Background(pixel(px, py+1)))
-		}
-	}
+	st := style(color)
+	a.fill(rect{x, y, w, h}, st)
+	a.text(x, y, "┌"+strings.Repeat("─", w-2)+"┐", st)
+	a.text(x, y+1, "│"+strings.Repeat(" ", w-2)+"│", st)
+	a.text(x, y+2, "└"+strings.Repeat("─", w-2)+"┘", st)
+	label := "₩"
 	if big {
-		a.text(x+3, y+1, "+30m", style(bg).Background(gold).Bold(true))
+		label = "₩ +30m"
 	}
+	a.text(x+(w-runewidth.StringWidth(label))/2, y+1, label, st.Bold(big))
 }
 func (a *App) drawScene(now time.Time) {
 	f := a.frame()
@@ -261,16 +247,16 @@ func (a *App) drawScene(now time.Time) {
 	for _, n := range a.notes {
 		p := max(0, min(1, now.Sub(n.born).Seconds()/n.duration.Seconds()))
 		x := f.x + 2 + int(n.x*float64(f.w-10))
-		y := 13 + int(p*float64(max(1, floor-13-2)))
+		y := 13 + int(p*float64(max(1, floor-13-3)))
 		a.bill(x, y, false, 0)
 	}
 	// Layered, deterministic stacks stay stable between frames.
-	for row := h - 5; row >= floor; row-- {
-		for x := f.x + 1; x+6 < f.x+f.w; x += 5 {
+	for row := h - 5; row >= floor; row -= 2 {
+		for x := f.x + 1; x+5 < f.x+f.w; x += 5 {
 			a.bill(x+(row%2), row, false, 1)
 		}
 	}
-	for x := f.x + 2; x+6 < f.x+f.w; x += 7 {
+	for x := f.x + 2; x+5 < f.x+f.w; x += 7 {
 		a.bill(x, floor+(x%3)/2, false, 0)
 	}
 	if a.session.BonusActive {

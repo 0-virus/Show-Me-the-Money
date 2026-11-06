@@ -243,8 +243,7 @@ func (a *App) bonusRect(now time.Time) rect {
 	floor := a.floor()
 	progress := now.Sub(a.session.BonusStarted).Seconds() / 10
 	progress = max(0, min(progress, 1))
-	w, pixels := billSize(true)
-	h := (pixels + 1) / 2
+	w, h := billSize(true)
 	return rect{f.x + 2 + int(a.bonusX*float64(f.w-w-4)), 13 + int(progress*float64(max(1, floor-13-h))), w, h}
 }
 func (a *App) floor() int {
