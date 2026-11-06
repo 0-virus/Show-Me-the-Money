@@ -4,6 +4,7 @@ from pathlib import Path
 import plistlib
 import struct
 import zipfile
+from package import VERSION
 
 root = Path(__file__).resolve().parents[1]
 dist = root / 'dist'
@@ -36,7 +37,7 @@ for path in [app/'MacOS/MoneyCopy',app/'Resources/Play.command']:
     require(b'\r' not in path.read_bytes(), 'CRLF breaks Mac launcher')
 
 for folder in ['Windows','macOS']:
-    with zipfile.ZipFile(dist/f'MoneyCopy-{folder}.zip') as archive:
+    with zipfile.ZipFile(dist/f'MoneyCopy-{folder}-v{VERSION}.zip') as archive:
         require(archive.testzip() is None, 'Corrupt ZIP')
         for member in archive.infolist():
             require(archive.read(member) == (dist/member.filename).read_bytes(), 'Archive differs from folder')

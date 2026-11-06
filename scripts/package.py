@@ -10,6 +10,7 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+VERSION = '1.1.0'
 DIST = ROOT / 'dist'
 BUILD = ROOT / 'artifacts/build'
 
@@ -39,7 +40,7 @@ def text(path, content):
 
 
 def zip_folder(folder):
-    dest = DIST / f'MoneyCopy-{folder.name}.zip'
+    dest = DIST / f'MoneyCopy-{folder.name}-v{VERSION}.zip'
     with zipfile.ZipFile(dest, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for path in sorted(folder.rglob('*')):
             if not path.is_file():
@@ -92,7 +93,7 @@ def main():
     text(resources/'Play.command', '#!/bin/sh\nset -eu\nHERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)\nexport LANG="${LANG:-en_US.UTF-8}"\nexport COLORTERM=truecolor\nexec "$HERE/moneycopy"\n')
     plist = dict(CFBundleExecutable='MoneyCopy', CFBundleIdentifier='local.moneycopy.game',
                  CFBundleName='Money Copy', CFBundleDisplayName='가만히 있어도 돈이 복사가 되면 얼마나 좋을까',
-                 CFBundlePackageType='APPL', CFBundleShortVersionString='1.1.0', CFBundleVersion='2',
+                 CFBundlePackageType='APPL', CFBundleShortVersionString=VERSION, CFBundleVersion='2',
                  LSMinimumSystemVersion='13.0', NSHighResolutionCapable=True)
     (bundle/'Info.plist').write_bytes(plistlib.dumps(plist))
     notices = third_party_notices()
