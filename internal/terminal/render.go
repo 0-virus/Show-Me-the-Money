@@ -109,7 +109,8 @@ func (a *App) Draw() {
 func (a *App) drawIntro() {
 	f := a.frame()
 	y := a.formY()
-	a.text(f.x+f.w-10, 2, "● OFFLINE / 01", style(muted))
+	badge := "● OFFLINE / 01"
+	a.text(f.x+f.w-runewidth.StringWidth(badge)-2, 2, badge, style(muted))
 	a.center(6, "가만히 있어도 돈이 복사가 되면 얼마나 좋을까", style(green).Bold(true))
 	a.button(a.monthRect(), "월급", !a.annual)
 	a.button(a.yearRect(), "연봉", a.annual)
@@ -174,7 +175,8 @@ func (a *App) drawResult() {
 	s := a.session
 	y := a.formY()
 	w, _ := a.screen.Size()
-	a.text(f.x+f.w-10, 2, "■ SETTLED / 03", style(muted))
+	badge := "■ SETTLED / 03"
+	a.text(f.x+f.w-runewidth.StringWidth(badge)-2, 2, badge, style(muted))
 	a.center(6, "신난다! 퇴근이다!", style(green).Bold(true))
 	reason := "직접 종료"
 	if s.Ended.Equal(s.Deadline) {
@@ -198,7 +200,11 @@ func (a *App) drawResult() {
 	if s.Started.Weekday() == time.Friday {
 		greeting = "고생하셨어요, 다음 주에 봐요!"
 	}
-	a.center(min(y+14, height-2), greeting, style(white))
+	greetingY := min(y+14, height-2)
+	if greetingY == f.y+f.h-2 {
+		greetingY = height - 2
+	}
+	a.center(greetingY, greeting, style(white))
 	a.center(f.y+f.h-2, "Enter 새로 시작   Esc 닫기", style(muted))
 }
 

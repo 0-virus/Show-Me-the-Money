@@ -125,3 +125,35 @@ func TestResultGreetingUsesStartWeekday(t *testing.T) {
 		}
 	}
 }
+
+func TestCompactResultKeepsGreetingAndFooterSeparate(t *testing.T) {
+	for _, height := range []int{24, 25, 26, 27, 28, 36} {
+		a, s, _ := setup(t)
+		s.SetSize(80, height)
+		input(a, "3600000")
+		key(a, tcell.KeyEnter)
+		key(a, tcell.KeyEscape)
+		input(a, "y")
+		a.Draw()
+		text := dump(s)
+		if !strings.Contains(text, "고생하셨어요, 다음 주에 봐요!") || !strings.Contains(text, "Enter 새로 시작") {
+			t.Fatalf("overlapping result at height %d", height)
+		}
+	}
+}
+func TestStatusBadgesStayWithinNarrowWindow(t *testing.T) {
+	a, s, _ := setup(t)
+	s.SetSize(76, 24)
+	a.Draw()
+	if !strings.Contains(dump(s), "OFFLINE / 01") {
+		t.Fatal("intro badge clipped")
+	}
+	input(a, "3600000")
+	key(a, tcell.KeyEnter)
+	key(a, tcell.KeyEscape)
+	input(a, "y")
+	a.Draw()
+	if !strings.Contains(dump(s), "SETTLED / 03") {
+		t.Fatal("result badge clipped")
+	}
+}
