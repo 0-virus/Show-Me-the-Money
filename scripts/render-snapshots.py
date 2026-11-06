@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 mono = ImageFont.truetype('C:/Windows/Fonts/consola.ttf', 18)
 korean = ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 17)
 cw, ch, margin = 11, 22, 24
-for path in (ROOT / 'artifacts/screens').glob('*.json'):
+for path in (ROOT / 'artifacts/screens').rglob('*.json'):
     data = json.loads(path.read_text(encoding='utf-8'))
     image = Image.new('RGB', (data['Width']*cw+margin*2, data['Height']*ch+margin*2), '#08120f')
     draw = ImageDraw.Draw(image)

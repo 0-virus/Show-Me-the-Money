@@ -4,8 +4,8 @@
 
 ## 실행
 
-- **Windows 10/11 (64비트)**: `MoneyCopy-Windows-v1.1.0.zip`을 풀고 `Windows/MoneyCopy.exe`를 더블클릭합니다.
-- **macOS 13 이상 (Intel / Apple Silicon)**: **Mac에서** `MoneyCopy-macOS-v1.1.0.zip`을 풀고 `macOS/MoneyCopy.app`을 더블클릭합니다. 기본 Terminal 앱에서 게임이 열립니다. ZIP에 실행 권한이 보존되어 있으므로 Windows에서 압축을 푼 폴더를 복사하는 대신 ZIP 자체를 Mac에 옮겨 주세요.
+- **Windows 10/11 (64비트)**: `MoneyCopy-Windows-v1.2.0.zip`을 풀고 `Windows/MoneyCopy.exe`를 더블클릭합니다.
+- **macOS 13 이상 (Intel / Apple Silicon)**: **Mac에서** `MoneyCopy-macOS-v1.2.0.zip`을 풀고 `macOS/MoneyCopy.app`을 더블클릭합니다. 기본 Terminal 앱에서 게임이 열립니다. ZIP에 실행 권한이 보존되어 있으므로 Windows에서 압축을 푼 폴더를 복사하는 대신 ZIP 자체를 Mac에 옮겨 주세요.
 - 인터넷, Go, Python, 별도 게임 런타임 설치는 필요하지 않습니다. 폴더 어디에 두어도 실행할 수 있습니다.
 - 권장 크기 110열 × 36행, 최소 76열 × 24행. 한글을 표시할 수 있는 터미널 글꼴을 사용하세요.
 - 급여는 저장하거나 외부에 전송하지 않습니다. 창을 닫으면 이번 게임 기록은 사라집니다.
@@ -66,7 +66,7 @@ go run ./cmd/moneycopy
 ./scripts/build.ps1 -SkipTests
 ```
 
-출력: `dist/Windows`, `dist/macOS`, OS별 ZIP, `dist/SHA256SUMS.txt`.
+출력: `dist/v1.2.0/Windows`, `dist/v1.2.0/macOS`, 같은 버전 폴더의 OS별 ZIP 및 `SHA256SUMS.txt`.
 화면 셀 스냅샷은 `MONEYCOPY_SNAPSHOTS` 환경 변수로 경로를 지정하면 테스트가 생성합니다. `scripts/render-snapshots.py`는 개발용 Pillow로 이를 PNG로 그립니다.
 
 테스트 범위와 실제 실행 확인 내용은 `docs/verification.md`에 기록합니다.

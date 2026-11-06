@@ -4,10 +4,10 @@ from pathlib import Path
 import plistlib
 import struct
 import zipfile
-from package import VERSION
+from package import VERSION, DIST
 
 root = Path(__file__).resolve().parents[1]
-dist = root / 'dist'
+dist = DIST
 
 def require(condition, message):
     if not condition:
