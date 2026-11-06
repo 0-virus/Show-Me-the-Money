@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/mattn/go-runewidth"
+	"github.com/rivo/uniseg"
 	"moneycopy/internal/game"
 )
 
@@ -47,7 +47,8 @@ func (a *App) text(x, y int, s string, st tcell.Style) {
 		return
 	}
 	for _, r := range s {
-		rw := runewidth.RuneWidth(r)
+		// Match tcell CellBuffer; locale-dependent ambiguous widths create gaps.
+		rw := uniseg.StringWidth(string(r))
 		if rw <= 0 {
 			continue
 		}
@@ -59,7 +60,7 @@ func (a *App) text(x, y int, s string, st tcell.Style) {
 }
 func (a *App) center(y int, s string, st tcell.Style) {
 	w, _ := a.screen.Size()
-	a.text((w-runewidth.StringWidth(s))/2, y, s, st)
+	a.text((w-uniseg.StringWidth(s))/2, y, s, st)
 }
 func (a *App) fill(r rect, st tcell.Style) {
 	for y := r.y; y < r.y+r.h; y++ {
@@ -75,7 +76,7 @@ func (a *App) button(r rect, label string, active bool) {
 		st = style(bg).Background(green).Bold(true)
 	}
 	a.fill(r, st)
-	a.text(r.x+(r.w-runewidth.StringWidth(label))/2, r.y+r.h/2, label, st)
+	a.text(r.x+(r.w-uniseg.StringWidth(label))/2, r.y+r.h/2, label, st)
 }
 func (a *App) Draw() {
 	a.screen.SetStyle(style(white))
@@ -110,7 +111,7 @@ func (a *App) drawIntro() {
 	f := a.frame()
 	y := a.formY()
 	badge := "● OFFLINE / 01"
-	a.text(f.x+f.w-runewidth.StringWidth(badge)-2, 2, badge, style(muted))
+	a.text(f.x+f.w-uniseg.StringWidth(badge)-2, 2, badge, style(muted))
 	a.center(6, "가만히 있어도 돈이 복사가 되면 얼마나 좋을까", style(green).Bold(true))
 	a.button(a.monthRect(), "월급", !a.annual)
 	a.button(a.yearRect(), "연봉", a.annual)
@@ -124,7 +125,7 @@ func (a *App) drawIntro() {
 	}
 	a.fill(rect{w/2 - 22, y + 5, 44, 2}, style(white).Background(panel))
 	a.text(w/2-20, y+5, amount, st.Bold(true))
-	a.screen.ShowCursor(w/2-20+runewidth.StringWidth(a.amount), y+5)
+	a.screen.ShowCursor(w/2-20+uniseg.StringWidth(a.amount), y+5)
 	n, err := strconv.ParseInt(strings.ReplaceAll(a.amount, ",", ""), 10, 64)
 	if err == nil {
 		if s, e := game.New(n, a.annual, a.now()); e == nil {
@@ -144,7 +145,7 @@ func (a *App) drawGame() {
 	a.button(a.stopRect(), "게임 종료 [Esc]", false)
 	a.text(f.x+2, 5, "시급 "+decimal(s.HourlyExact())+"원", style(muted))
 	remain := "퇴근까지 " + duration(s.Deadline.Sub(now))
-	a.text(f.x+f.w-runewidth.StringWidth(remain)-2, 5, remain, style(muted))
+	a.text(f.x+f.w-uniseg.StringWidth(remain)-2, 5, remain, style(muted))
 	col := (f.w - 4) / 3
 	for i, item := range []struct {
 		label string
@@ -158,10 +159,10 @@ func (a *App) drawGame() {
 	interval := game.PayInterval.Seconds()
 	progress := max(0, min(interval, now.Sub(s.Started).Seconds()-float64(s.Ticks)*interval))
 	cells := int(progress / interval * 12)
-	gauge := "│" + strings.Repeat("█", cells) + strings.Repeat(" ", 12-cells) + "│"
+	gauge := "┃" + strings.Repeat("█", cells) + strings.Repeat(" ", 12-cells) + "┃"
 	gaugeX := f.x + 2
 	a.text(gaugeX, 10, gauge, style(green).Background(panel).Bold(true))
-	a.text(gaugeX+runewidth.StringWidth(gauge)+2, 10, fmt.Sprintf("다음 입금 %.0fs", math.Ceil(interval-progress)), style(muted))
+	a.text(gaugeX+uniseg.StringWidth(gauge)+2, 10, fmt.Sprintf("다음 입금 %.0fs", math.Ceil(interval-progress)), style(muted))
 	a.text(f.x+f.w-24, 10, "1분치 급여 자동 적립", style(muted))
 	a.drawScene(now)
 	if now.Before(a.toastUntil) {
@@ -176,7 +177,7 @@ func (a *App) drawResult() {
 	y := a.formY()
 	w, _ := a.screen.Size()
 	badge := "■ SETTLED / 03"
-	a.text(f.x+f.w-runewidth.StringWidth(badge)-2, 2, badge, style(muted))
+	a.text(f.x+f.w-uniseg.StringWidth(badge)-2, 2, badge, style(muted))
 	a.center(6, "신난다! 퇴근이다!", style(green).Bold(true))
 	reason := "직접 종료"
 	if s.Ended.Equal(s.Deadline) {
@@ -191,7 +192,7 @@ func (a *App) drawResult() {
 		yy := y + 3 + i*2
 		a.text(w/2-22, yy, item.label, style(item.color))
 		v := money(item.value) + " 원"
-		a.text(w/2+22-runewidth.StringWidth(v), yy, v, style(item.color).Bold(true))
+		a.text(w/2+22-uniseg.StringWidth(v), yy, v, style(item.color).Bold(true))
 	}
 	a.rule(w/2-22, y+6, 44)
 	a.button(a.startRect(), "다시 출근하기...", true)
@@ -226,14 +227,14 @@ func (a *App) bill(x, y int, big bool, tint int) {
 	}
 	st := style(color)
 	a.fill(rect{x, y, w, h}, st)
-	a.text(x, y, "┌"+strings.Repeat("─", w-2)+"┐", st)
-	a.text(x, y+1, "│"+strings.Repeat(" ", w-2)+"│", st)
-	a.text(x, y+2, "└"+strings.Repeat("─", w-2)+"┘", st)
+	a.text(x, y, "┏"+strings.Repeat("━", w-2)+"┓", st)
+	a.text(x, y+1, "┃"+strings.Repeat(" ", w-2)+"┃", st)
+	a.text(x, y+2, "┗"+strings.Repeat("━", w-2)+"┛", st)
 	label := "₩"
 	if big {
 		label = "₩ +30m"
 	}
-	a.text(x+(w-runewidth.StringWidth(label))/2, y+1, label, st.Bold(big))
+	a.text(x+(w-uniseg.StringWidth(label))/2, y+1, label, st.Bold(big))
 }
 func (a *App) drawScene(now time.Time) {
 	f := a.frame()

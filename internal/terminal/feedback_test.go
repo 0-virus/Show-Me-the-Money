@@ -100,7 +100,7 @@ func TestGaugeAndNextPaymentDoNotOverlap(t *testing.T) {
 		a.Tick()
 		a.Draw()
 		row := strings.Split(dump(s), "\n")[10]
-		close := strings.LastIndex(row, "│")
+		close := strings.LastIndex(row, "┃")
 		label := strings.Index(row, "다음 입금")
 		if close < 0 || label < close+2 || !strings.Contains(row, "1s") {
 			t.Fatalf("overlap at width %d: %s", size, row)

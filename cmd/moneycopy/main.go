@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const version = "1.0.1"
+const version = "1.0.2"
 
 func run() error {
 	screen, err := tcell.NewScreen()
